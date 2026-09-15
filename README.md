@@ -47,13 +47,17 @@ Frontend: [assignment-employee-management-web](https://github.com/nichapa-nop/as
    | `DB_DATABASE` | Database name | `employee_management` |
    | `DB_LOGGING` | Log SQL queries | `false` |
 
-3. Install dependencies, run migrations, and start the dev server:
+3. Install dependencies, create the schema, import the sample data, and start the dev server:
 
    ```bash
    npm install
-   npm run migration:run
+   npm run db:setup
    npm run start:dev
    ```
+
+   `db:setup` runs the migrations and then seeds employees from
+   `src/database/seeds/data/employees.xlsx` (sheet "Example Data"). The seed is
+   idempotent: re-running it restores the original rows without duplicates.
 
 - API: `http://localhost:3001/api`
 - Swagger docs: `http://localhost:3001/api/docs`
@@ -74,6 +78,25 @@ Frontend: [assignment-employee-management-web](https://github.com/nichapa-nop/as
 | `npm run migration:revert` | Revert the last migration |
 | `npm run migration:show` | List migrations and their status |
 | `npm run migration:run:prod` | Apply migrations using the compiled build |
+| `npm run migration:check` | Fail if entities and the database schema differ |
+| `npm run seed` | Import employees from the Excel file |
+| `npm run db:setup` | Run migrations, then seed |
+
+## Data model
+
+`employees`
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `integer` identity | Auto-generated, starts at 101 |
+| `name` | `varchar(100)` | Required |
+| `department` | enum | `Engineering`, `Marketing`, `Sales`, `HR` |
+| `salary` | `numeric(12,2)` | `CHECK (salary >= 0)` |
+| `join_date` | `date` | Returned as `YYYY-MM-DD` to avoid time zone shifts |
+| `is_active` | `boolean` | Default `true` |
+| `created_at` | `timestamptz` | Auto |
+| `updated_at` | `timestamptz` | "Last Updated Date", stamped on every write |
+| `deleted_at` | `timestamptz` | Soft delete marker |
 
 ## Error response format
 
