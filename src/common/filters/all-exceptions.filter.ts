@@ -10,6 +10,27 @@ import type { Request, Response } from 'express';
 import { STATUS_CODES } from 'http';
 import { ErrorResponseDto } from '../dto/error-response.dto';
 
+const INTERNAL_ERROR_MESSAGE = 'Internal server error';
+
+/**
+ * Errors created by the `http-errors` package, e.g. thrown by body-parser
+ * for oversized payloads (413) or unsupported charsets (415).
+ */
+interface HttpError extends Error {
+  statusCode: number;
+  expose?: boolean;
+}
+
+function isHttpError(exception: unknown): exception is HttpError {
+  const statusCode = (exception as Partial<HttpError> | null)?.statusCode;
+  return (
+    exception instanceof Error &&
+    typeof statusCode === 'number' &&
+    statusCode >= 400 &&
+    statusCode < 600
+  );
+}
+
 /**
  * Converts every thrown exception into a consistent ErrorResponseDto body.
  * Unexpected errors are logged and returned as a generic 500 so internal
@@ -24,10 +45,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const request = context.getRequest<Request>();
     const response = context.getResponse<Response>();
 
-    const statusCode =
-      exception instanceof HttpException
-        ? exception.getStatus()
-        : HttpStatus.INTERNAL_SERVER_ERROR;
+    const statusCode = this.resolveStatus(exception);
 
     if (statusCode >= 500) {
       this.logger.error(
@@ -47,17 +65,31 @@ export class AllExceptionsFilter implements ExceptionFilter {
     response.status(statusCode).json(body);
   }
 
+  private resolveStatus(exception: unknown): number {
+    if (exception instanceof HttpException) {
+      return exception.getStatus();
+    }
+    if (isHttpError(exception)) {
+      return exception.statusCode;
+    }
+    return HttpStatus.INTERNAL_SERVER_ERROR;
+  }
+
   private resolveMessage(exception: unknown): string | string[] {
-    if (!(exception instanceof HttpException)) {
-      return 'Internal server error';
+    if (exception instanceof HttpException) {
+      const exceptionResponse = exception.getResponse();
+      if (typeof exceptionResponse === 'string') {
+        return exceptionResponse;
+      }
+
+      const { message } = exceptionResponse as { message?: string | string[] };
+      return message ?? exception.message;
     }
 
-    const exceptionResponse = exception.getResponse();
-    if (typeof exceptionResponse === 'string') {
-      return exceptionResponse;
+    if (isHttpError(exception) && exception.expose) {
+      return exception.message;
     }
 
-    const { message } = exceptionResponse as { message?: string | string[] };
-    return message ?? exception.message;
+    return INTERNAL_ERROR_MESSAGE;
   }
 }
