@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { decimalTransformer } from '../../../database/transformers/decimal.transformer';
 import { Department } from '../../departments/enums/department.enum';
+import { EMPLOYEE_NAME_MAX_LENGTH } from '../employee.constants';
 
 @Entity({ name: 'employees' })
 @Check('CHK_employees_salary_non_negative', '"salary" >= 0')
@@ -21,7 +22,7 @@ export class Employee {
   })
   id: number;
 
-  @Column({ type: 'varchar', length: 100 })
+  @Column({ type: 'varchar', length: EMPLOYEE_NAME_MAX_LENGTH })
   name: string;
 
   @Index('IDX_employees_department')

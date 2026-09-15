@@ -1,4 +1,8 @@
 import { Department } from '../../modules/departments/enums/department.enum';
+import {
+  EMPLOYEE_NAME_MAX_LENGTH,
+  EMPLOYEE_SALARY_MAX,
+} from '../../modules/employees/employee.constants';
 import { SheetRow } from './worksheet.reader';
 
 /** Column headers used in the source Excel file. */
@@ -22,7 +26,6 @@ export interface EmployeeSeedRecord {
   updatedAt: Date;
 }
 
-const NAME_MAX_LENGTH = 100;
 const DEPARTMENTS: string[] = Object.values(Department);
 
 class SeedRowError extends Error {
@@ -44,11 +47,11 @@ function parseId(value: unknown, rowNumber: number): number {
 
 function parseName(value: unknown, rowNumber: number): string {
   const name = typeof value === 'string' ? value.trim() : '';
-  if (name.length === 0 || name.length > NAME_MAX_LENGTH) {
+  if (name.length === 0 || name.length > EMPLOYEE_NAME_MAX_LENGTH) {
     throw new SeedRowError(
       rowNumber,
       EMPLOYEE_SHEET_HEADERS.name,
-      `must be 1-${NAME_MAX_LENGTH} characters`,
+      `must be 1-${EMPLOYEE_NAME_MAX_LENGTH} characters`,
     );
   }
   return name;
@@ -67,14 +70,16 @@ function parseDepartment(value: unknown, rowNumber: number): Department {
 }
 
 function parseSalary(value: unknown, rowNumber: number): number {
-  if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) {
+  const salary =
+    typeof value === 'number' ? Math.round(value * 100) / 100 : Number.NaN;
+  if (!Number.isFinite(salary) || salary < 0 || salary > EMPLOYEE_SALARY_MAX) {
     throw new SeedRowError(
       rowNumber,
       EMPLOYEE_SHEET_HEADERS.salary,
-      'must be a non-negative number',
+      `must be a number between 0 and ${EMPLOYEE_SALARY_MAX}`,
     );
   }
-  return Math.round(value * 100) / 100;
+  return salary;
 }
 
 function parseDate(value: unknown, rowNumber: number, column: string): Date {

@@ -63,7 +63,12 @@ describe('parseEmployeeRows', () => {
   it.each([
     [headers.department, 'Finance', 'must be one of'],
     [headers.status, 'Pending', 'must be "Active" or "Inactive"'],
-    [headers.salary, -1, 'must be a non-negative number'],
+    [headers.salary, -1, 'must be a number between 0 and 9999999999.99'],
+    [
+      headers.salary,
+      10_000_000_000,
+      'must be a number between 0 and 9999999999.99',
+    ],
     [headers.joinDate, '2023-01-15', 'must be a valid date'],
     [headers.name, '', 'must be 1-100 characters'],
     [headers.id, 0, 'must be a positive integer'],
