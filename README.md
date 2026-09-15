@@ -98,6 +98,50 @@ Frontend: [assignment-employee-management-web](https://github.com/nichapa-nop/as
 | `updated_at` | `timestamptz` | "Last Updated Date", stamped on every write |
 | `deleted_at` | `timestamptz` | Soft delete marker |
 
+## API
+
+Base URL: `http://localhost:3001/api` — interactive docs at `/api/docs`.
+
+| Method | Endpoint | Description | Success | Errors |
+|---|---|---|---|---|
+| GET | `/departments` | Department values for the dropdown | 200 | — |
+| GET | `/employees` | List with search, filters, sorting, paging | 200 | 400 |
+| GET | `/employees/:id` | Get one employee | 200 | 400, 404 |
+| POST | `/employees` | Create an employee | 201 | 400 |
+| PATCH | `/employees/:id` | Update some fields | 200 | 400, 404 |
+| DELETE | `/employees/:id` | Soft delete | 204 | 400, 404 |
+
+### Query parameters for `GET /employees`
+
+| Parameter | Type | Description |
+|---|---|---|
+| `search` | string | Part of the name (case-insensitive) or an exact ID |
+| `department` | enum | `Engineering`, `Marketing`, `Sales`, `HR` |
+| `isActive` | boolean | `true` = Active, `false` = Inactive |
+| `joinDateFrom`, `joinDateTo` | `YYYY-MM-DD` | Inclusive join date range |
+| `salaryMin`, `salaryMax` | number | Inclusive salary range |
+| `sortBy` | enum | `id` (default), `name`, `department`, `salary`, `joinDate`, `isActive`, `updatedAt` |
+| `sortOrder` | enum | `ASC` (default) or `DESC` |
+| `page` | integer | Default `1` |
+| `limit` | integer | Default `10`, max `100` |
+
+Unknown parameters are rejected with 400.
+
+### Request body for `POST` / `PATCH`
+
+```json
+{
+  "name": "John Doe",
+  "department": "Engineering",
+  "salary": 65000,
+  "joinDate": "2023-01-15",
+  "isActive": true
+}
+```
+
+All fields are required for `POST` and optional for `PATCH` (`null` is rejected).
+`id`, `createdAt` and `updatedAt` are set by the system and cannot be sent.
+
 ## Error response format
 
 Every error returns the same shape:
@@ -119,9 +163,9 @@ Every error returns the same shape:
 ```
 src/
 ├── config/                 # environment configuration
-├── common/                 # shared DTOs, filters, interceptors, constants
-├── database/               # migrations, seeds
+├── common/                 # shared constants, DTOs, enums, filters, transformers, validators
+├── database/               # data source, migrations, seeds, column transformers
 └── modules/
-    ├── employees/          # dto/, entities/, controller, service, module
-    └── departments/        # dto/, entities/, controller, service, module
+    ├── employees/          # dto/, entities/, enums/, controller, service, repository, module
+    └── departments/        # enums/, controller, service, module
 ```
