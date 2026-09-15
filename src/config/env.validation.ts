@@ -11,22 +11,11 @@ import {
   IsEnum,
   IsInt,
   IsNotEmpty,
-  IsOptional,
   IsString,
   Max,
   Min,
   validateSync,
 } from 'class-validator';
-
-/** Same meaning as libpq's sslmode for the modes that are supported. */
-export enum DatabaseSslMode {
-  /** Plain connection (local PostgreSQL). */
-  Disable = 'disable',
-  /** Encrypted, without verifying the server certificate. */
-  Require = 'require',
-  /** Encrypted and verified against DB_SSL_CA (or the system CAs). */
-  VerifyFull = 'verify-full',
-}
 
 export enum NodeEnvironment {
   Development = 'development',
@@ -62,15 +51,6 @@ export class DatabaseEnvironmentVariables {
   )
   @IsBoolean()
   DB_LOGGING: boolean = false;
-
-  @IsEnum(DatabaseSslMode)
-  DB_SSL_MODE: DatabaseSslMode = DatabaseSslMode.Disable;
-
-  /** Path to a PEM CA certificate, e.g. the one downloaded from Supabase. */
-  @IsOptional()
-  @IsString()
-  @IsNotEmpty()
-  DB_SSL_CA?: string;
 }
 
 /** All variables required to run the HTTP application. */
