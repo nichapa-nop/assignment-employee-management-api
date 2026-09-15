@@ -101,6 +101,29 @@ Migrations enable Row Level Security on the tables. Supabase's Data API is
 reachable with the public (publishable) key, and RLS without policies blocks
 that path; this API is unaffected because it connects as the table owner.
 
+## Deploying to Render
+
+The repository includes a [Render Blueprint](render.yaml) for a free web
+service in Singapore. The database stays on Supabase (see above); run
+`npm run db:setup` against it once from your machine to create the schema and
+import the sample data.
+
+1. In Render choose **New → Blueprint**, connect this GitHub repository and
+   select `render.yaml`.
+2. Fill in the prompted values: `DB_HOST`, `DB_USERNAME`, `DB_PASSWORD`
+   (Session pooler values from Supabase) and `CORS_ORIGIN` (your Vercel URL,
+   for example `https://your-app.vercel.app`; comma-separate multiple origins).
+3. Under the service's **Environment → Secret Files**, add the Supabase CA
+   certificate with the filename `supabase-ca.crt`. It is mounted at
+   `/etc/secrets/supabase-ca.crt`, which `DB_SSL_CA` already points to.
+4. Deploy. The build compiles the app, and every start applies pending
+   migrations before launching the server. The health check is
+   `/api/departments`.
+
+The API is then available at `https://<service-name>.onrender.com/api` with
+Swagger at `/api/docs`. Free services sleep after 15 minutes without traffic
+and take about a minute to wake up, so open the API once before a demo.
+
 ## Scripts
 
 | Command | Description |
