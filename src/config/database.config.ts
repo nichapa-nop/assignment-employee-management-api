@@ -1,6 +1,6 @@
 import { registerAs } from '@nestjs/config';
 import { readFileSync } from 'fs';
-import { validateDatabaseEnv } from './env.validation';
+import { DatabaseSslMode, validateDatabaseEnv } from './env.validation';
 
 function readCaCertificate(path: string | undefined): string | undefined {
   if (!path) {
@@ -24,6 +24,11 @@ export default registerAs('database', () => {
     database: env.DB_DATABASE,
     logging: env.DB_LOGGING,
     sslMode: env.DB_SSL_MODE,
-    sslCa: readCaCertificate(env.DB_SSL_CA),
+    // The certificate is only used to verify the server, so don't require the
+    // file to exist in the other modes.
+    sslCa:
+      env.DB_SSL_MODE === DatabaseSslMode.VerifyFull
+        ? readCaCertificate(env.DB_SSL_CA)
+        : undefined,
   };
 });
