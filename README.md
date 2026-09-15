@@ -8,7 +8,7 @@ Frontend: [assignment-employee-management-web](https://github.com/nichapa-nop/as
 
 - NestJS 11
 - TypeORM
-- PostgreSQL (local installation)
+- PostgreSQL (local installation or [Supabase](https://supabase.com))
 - class-validator / class-transformer
 - Swagger (OpenAPI)
 
@@ -46,6 +46,8 @@ Frontend: [assignment-employee-management-web](https://github.com/nichapa-nop/as
    | `DB_PASSWORD` | PostgreSQL password | `postgres` |
    | `DB_DATABASE` | Database name | `employee_management` |
    | `DB_LOGGING` | Log SQL queries | `false` |
+   | `DB_SSL_MODE` | `disable`, `require` (encrypted, no certificate check) or `verify-full` | `disable` |
+   | `DB_SSL_CA` | Optional path to a PEM CA certificate used by `verify-full` | `./certs/supabase-ca.crt` |
 
 3. Install dependencies, create the schema, import the sample data, and start the dev server:
 
@@ -64,6 +66,40 @@ Frontend: [assignment-employee-management-web](https://github.com/nichapa-nop/as
 
 To use the web UI, run the [frontend](https://github.com/nichapa-nop/assignment-employee-management-web)
 on `http://localhost:3000` (the default `CORS_ORIGIN`).
+
+## Using Supabase as the database
+
+The API talks to Supabase like any PostgreSQL server; the frontend keeps using
+this REST API, so no Supabase client libraries are needed.
+
+1. In the Supabase dashboard open **Connect** and copy the **Session pooler**
+   parameters (it works over IPv4; the direct connection is IPv6-only on the
+   free plan).
+2. Download the CA certificate from **Project Settings → Database → SSL
+   Configuration** and save it, for example, as `certs/supabase-ca.crt`.
+3. Set the database variables in `.env` (skip step 1 of Getting started —
+   the `postgres` database already exists):
+
+   ```dotenv
+   DB_HOST=aws-0-<region>.pooler.supabase.com
+   DB_PORT=5432
+   DB_USERNAME=postgres.<project-ref>
+   DB_PASSWORD=<your database password>
+   DB_DATABASE=postgres
+   DB_SSL_MODE=verify-full
+   DB_SSL_CA=./certs/supabase-ca.crt
+   ```
+
+4. Create the schema and import the sample data, then start the API:
+
+   ```bash
+   npm run db:setup
+   npm run start:dev
+   ```
+
+Migrations enable Row Level Security on the tables. Supabase's Data API is
+reachable with the public (publishable) key, and RLS without policies blocks
+that path; this API is unaffected because it connects as the table owner.
 
 ## Scripts
 
@@ -95,7 +131,8 @@ npm run test:e2e    # HTTP tests against a real PostgreSQL test database
 E2E tests use `<DB_DATABASE>_test` (override with `DB_TEST_DATABASE`; the `_test`
 suffix is always enforced). The database is created and migrated automatically,
 and the `employees` table is truncated before each test, so development data is
-never touched.
+never touched. Run e2e tests against a local PostgreSQL: if `.env` points to
+Supabase, override the `DB_*` variables for the test run.
 
 ## Data model
 
