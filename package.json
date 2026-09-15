@@ -24,7 +24,10 @@
     "migration:run": "npm run typeorm -- migration:run",
     "migration:revert": "npm run typeorm -- migration:revert",
     "migration:show": "npm run typeorm -- migration:show",
-    "migration:run:prod": "typeorm -d dist/database/data-source.js migration:run"
+    "migration:run:prod": "typeorm -d dist/database/data-source.js migration:run",
+    "migration:check": "npm run typeorm -- migration:generate src/database/migrations/SchemaCheck --check",
+    "seed": "ts-node src/database/seeds/seed.ts",
+    "db:setup": "npm run migration:run && npm run seed"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
@@ -56,6 +59,7 @@
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.2",
+    "exceljs": "^4.4.0",
     "globals": "^17.0.0",
     "jest": "^30.0.0",
     "prettier": "^3.4.2",
@@ -69,7 +73,8 @@
     "typescript-eslint": "^8.20.0"
   },
   "overrides": {
-    "multer": "^2.4.0"
+    "multer": "^2.4.0",
+    "uuid": "^11.1.1"
   },
   "jest": {
     "moduleFileExtensions": [
