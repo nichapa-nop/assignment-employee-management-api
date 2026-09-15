@@ -71,7 +71,7 @@ Frontend: [assignment-employee-management-web](https://github.com/nichapa-nop/as
 | `npm run start:prod` | Run compiled build |
 | `npm run lint` | Lint and fix |
 | `npm test` | Unit tests |
-| `npm run test:e2e` | End-to-end tests |
+| `npm run test:e2e` | End-to-end tests against the test database |
 | `npm run migration:generate -- src/database/migrations/<Name>` | Generate a migration from entity changes |
 | `npm run migration:create -- src/database/migrations/<Name>` | Create an empty migration |
 | `npm run migration:run` | Apply pending migrations |
@@ -81,6 +81,18 @@ Frontend: [assignment-employee-management-web](https://github.com/nichapa-nop/as
 | `npm run migration:check` | Fail if entities and the database schema differ |
 | `npm run seed` | Import employees from the Excel file |
 | `npm run db:setup` | Run migrations, then seed |
+
+## Testing
+
+```bash
+npm test            # unit tests (no database needed)
+npm run test:e2e    # HTTP tests against a real PostgreSQL test database
+```
+
+E2E tests use `<DB_DATABASE>_test` (override with `DB_TEST_DATABASE`; the `_test`
+suffix is always enforced). The database is created and migrated automatically,
+and the `employees` table is truncated before each test, so development data is
+never touched.
 
 ## Data model
 
