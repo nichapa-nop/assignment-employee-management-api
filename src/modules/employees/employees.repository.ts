@@ -48,9 +48,15 @@ export class EmployeesRepository {
 
     this.applyFilters(builder, query);
 
+    builder.orderBy(SORT_EXPRESSIONS[query.sortBy], query.sortOrder);
+    // Tie-breaker for stable paging. TypeORM keys ORDER BY entries by
+    // expression, so adding it when already sorting by id would overwrite
+    // the requested direction.
+    if (query.sortBy !== EmployeeSortField.Id) {
+      builder.addOrderBy(`${ALIAS}.id`, 'ASC');
+    }
+
     return builder
-      .orderBy(SORT_EXPRESSIONS[query.sortBy], query.sortOrder)
-      .addOrderBy(`${ALIAS}.id`, 'ASC')
       .offset((query.page - 1) * query.limit)
       .limit(query.limit)
       .getManyAndCount();

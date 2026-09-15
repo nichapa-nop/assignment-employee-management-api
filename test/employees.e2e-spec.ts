@@ -204,6 +204,14 @@ describe('Employees API (e2e)', () => {
       ]);
     });
 
+    it('sorts by id descending', async () => {
+      const result = await list({ sortBy: 'id', sortOrder: 'DESC' });
+
+      expect(result.data.map((employee) => employee.id)).toEqual([
+        105, 104, 103, 102, 101,
+      ]);
+    });
+
     it('paginates results', async () => {
       const result = await list({ page: 2, limit: 2 });
 
