@@ -62,6 +62,9 @@ Frontend: [assignment-employee-management-web](https://github.com/nichapa-nop/as
 - API: `http://localhost:3001/api`
 - Swagger docs: `http://localhost:3001/api/docs`
 
+To use the web UI, run the [frontend](https://github.com/nichapa-nop/assignment-employee-management-web)
+on `http://localhost:3000` (the default `CORS_ORIGIN`).
+
 ## Scripts
 
 | Command | Description |
