@@ -42,6 +42,24 @@ describe('validateEnv', () => {
   });
 });
 
+describe('DB_SSL_MODE', () => {
+  it('defaults to disable', () => {
+    expect(validateEnv(appEnv).DB_SSL_MODE).toBe('disable');
+  });
+
+  it.each(['require', 'verify-full'])('accepts %s', (mode) => {
+    expect(validateEnv({ ...appEnv, DB_SSL_MODE: mode }).DB_SSL_MODE).toBe(
+      mode,
+    );
+  });
+
+  it('rejects an unknown mode', () => {
+    expect(() => validateEnv({ ...appEnv, DB_SSL_MODE: 'prefer' })).toThrow(
+      'DB_SSL_MODE must be one of the following values',
+    );
+  });
+});
+
 describe('validateDatabaseEnv', () => {
   it('accepts database variables without HTTP settings', () => {
     expect(validateDatabaseEnv(databaseEnv).DB_DATABASE).toBe(
